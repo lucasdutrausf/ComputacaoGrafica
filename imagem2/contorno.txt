@@ -1,0 +1,398 @@
+void setup() {
+  size(1200, 640);
+  noLoop();
+}
+
+void draw() {
+  PImage img = loadImage("img2.jpg");
+ // PImage imgMask = loadImage("img1 - mask.png");
+  PImage aux = createImage(img.width, img.height, RGB);
+  PImage aux2 = loadImage("img2.jpg");
+  PImage aux3 = loadImage("img2.jpg");
+  PImage aux4 = loadImage("img2.jpg");  
+  PImage aux5 = loadImage("img2.jpg");
+  PImage imgCinza = createImage(img.width, img.height, RGB);
+   PImage imgJanela = loadImage("img2.jpg");
+ 
+   //blur
+   int jan = 1; 
+ // range de cinza
+   int c1 = 0;
+   int c2 = 50;  
+   // range colorido
+   int r [] = new int[2]; 
+   r[0] = 0; 
+   r[1] = 80;
+   
+   int g [] = new int[2]; 
+   g[0] = 0; 
+   g[1] =80;
+   
+   int b [] = new int[2]; 
+   b[0] = 0; 
+   b[1] = 80;
+   
+ 
+  
+  //imgCinza = filtroEscalaCinza(aux, img);  // apagar dpois
+  //aux = filtroEscalaCinza(aux, img);
+
+//Filtro de Média com Janela Deslizante
+   //imgJanela = filtroMediaJanela(aux,imgJanela,img, jan);
+   aux2  = filtroMediaColoridoJanela(aux2, jan);   
+   aux3  = filtroMediaColoridoJanela(aux3, jan);
+   aux4 = realcarCor2(aux4,"blue",50);
+   
+  // aux4 = filtroEscalaCinza(aux4, img);
+   //aux5 = realcarCor(aux5,"blue",20);
+   
+    //aux3 = aux2;
+  // Filtro de limiarização
+  aux3 = limiarizarColoridoRange(aux3,r,g,b);
+  
+  aux5 = limiarizarColoridoRange(aux5,r,g,b);
+  imgJanela = limiarizarColoridoRange(imgJanela,r,g,b);
+  //aux2 = limiarizarCinza(aux2,c1,c2);
+   //verificarPixel(imgMask,aux2);
+  
+  image(img,0,0);
+  image(aux2,aux.width +10,0);
+  image(aux3,aux.width +10,img.height + 10);
+  image(imgJanela,0,img.height + 10);
+  image(aux4,(aux.width*2)+20,0);
+  image(aux5,(aux.width*2)+20,img.height + 10);
+  
+  
+  
+  //image(aux2,(img.width + 10),0);
+  //image(imgG,(img.width + 10),img.height+ 10);
+  //image(imgJanela,((img.width*3) + 10),0);
+  //linhasOrientacao();
+}
+
+
+//limiariraz
+// Verifica os tons de cinza e os tons entre a faixa cinza1 e cinza2 são pintados de preto
+
+PImage limiarizarColoridoRange(PImage aux, int r[],int g[],int b[]){
+   for (int y = 0; y < aux.height; y++) {
+    for (int x = 0; x < aux.width; x++) {
+      int pos = (y)*aux.width + (x);
+      
+      //int media = int(red(aux2.pixels[pos]) + green(aux2.pixels[pos]) + blue(aux2.pixels[pos]))/3;
+      if((red(aux.pixels[pos]) > r[0] &&  red(aux.pixels[pos]) < r[1]) 
+     && (green(aux.pixels[pos]) > g[0] && green(aux.pixels[pos]) < g[1]) 
+      && (blue(aux.pixels[pos]) > b[0] && blue(aux.pixels[pos]) < b[1])
+      
+      ) aux.pixels[pos] = color(255);
+      else aux.pixels[pos] = color(0);
+      
+    }
+  }
+  return aux;
+}
+
+PImage limiarizarCinza(PImage aux2, int cinza1,int cinza2){
+  
+   for (int y = 0; y < aux2.height; y++) {
+    for (int x = 0; x < aux2.width; x++) {
+      int pos = (y)*aux2.width + (x);
+      //int media = int(red(aux2.pixels[pos]) + green(aux2.pixels[pos]) + blue(aux2.pixels[pos]))/3;
+      if(blue(aux2.pixels[pos]) > cinza1 && blue(aux2.pixels[pos]) < cinza2) aux2.pixels[pos] = color(255);
+      else aux2.pixels[pos] = color(0);
+      
+    }
+  }
+  return aux2;
+}
+
+
+//escala cinza
+//transforma a imagem em escala de cinza
+PImage filtroEscalaCinza(PImage aux, PImage img){
+    for (int y = 0; y < img.height; y++) {
+    for (int x = 0; x < img.width; x++) {
+
+      int pos = (y)*img.width + (x);
+      //int media = int((green(img.pixels[pos]) + red(img.pixels[pos]))/2);
+      int media = int(green(img.pixels[pos]));
+      aux.pixels[pos] = color(media);
+    }
+  }
+  return aux;
+}
+
+
+//Media de janela flutuante
+//borra a imagem conforme o tamanho da janela
+
+PImage filtroMediaJanela(PImage aux,int jan){
+    // Filtro de Média com Janela Deslizante
+  for (int y = 0; y < aux.height; y++) {
+    for (int x = 0; x < aux.width; x++) {
+      //int jan = 9;
+      int pos = y*aux.width + x; /* acessa o ponto em forma de vetor */
+
+      float media = 0;
+      int qtde = 0;
+
+      for (int i = jan*(-1); i <= jan; i++) {
+        for (int j = jan*(-1); j <= jan; j++) {
+          int disy = y+i;
+          int disx = x+j;
+          if (disy >= 0 && disy < aux.height &&
+            disx >= 0 && disx < aux.width) {
+            int pos_aux = disy * aux.width + disx;
+            float r = blue(aux.pixels[pos_aux]);
+            media += r;
+            qtde++;
+          }
+        }
+      }
+      media = media / qtde;
+      aux.pixels[pos] = color(media);
+    }
+  }
+  
+  return aux;
+}
+
+
+PImage filtroMediaColoridoJanela(PImage aux,int jan){
+    // Filtro de Média com Janela Deslizante
+  for (int y = 0; y < aux.height; y++) {
+    for (int x = 0; x < aux.width; x++) {
+      //int jan = 9;
+      int pos = y*aux.width + x; /* acessa o ponto em forma de vetor */
+
+      float mediar = 0;
+      float mediag = 0;
+      float mediab = 0;
+      int qtde = 0;
+
+      for (int i = jan*(-1); i <= jan; i++) {
+        for (int j = jan*(-1); j <= jan; j++) {
+          int disy = y+i;
+          int disx = x+j;
+          if (disy >= 0 && disy < aux.height &&
+            disx >= 0 && disx < aux.width) {
+            int pos_aux = disy * aux.width + disx;
+            float r = blue(aux.pixels[pos_aux]);
+            float g = green(aux.pixels[pos_aux]);
+            float b = blue(aux.pixels[pos_aux]);
+            mediar += r;
+            mediag += g;
+            mediab += b;
+            qtde++;
+          }
+        }
+      }
+      mediar = mediar / qtde;
+      mediag = mediag / qtde;
+      mediab = mediab / qtde;
+      
+      aux.pixels[pos] = color(mediar,mediag,mediab);
+    }
+  }
+  
+  return aux;
+}
+
+
+PImage realcarCor(PImage aux,String cor, int qtd){
+    // Filtro de Média com Janela Deslizante
+  for (int y = 0; y < aux.height; y++) {
+    for (int x = 0; x < aux.width; x++) {
+      //int jan = 9;
+      
+      int pos = y*aux.width + x; /* acessa o ponto em forma de vetor */
+       
+      float ri = red(aux.pixels[pos]);
+      float gi = green(aux.pixels[pos]);
+      float bi = blue(aux.pixels[pos]);
+      
+       if(cor == "red") {
+         float newRed = ri + qtd;
+         if(newRed > 255){
+           newRed = 255;
+         }else if(newRed < 0){
+           newRed = 0;
+         }         
+          aux.pixels[pos] = color(newRed,gi,bi );  
+          
+       }else if(cor == "green"){
+         float newGreen = ri + qtd;
+         if(newGreen > 255){
+           newGreen = 255;
+         }else if(newGreen < 0){
+           newGreen = 0;
+         }            
+          aux.pixels[pos] = color(ri,newGreen,bi );  
+          
+       }else if(cor == "blue"){
+         float newBlue = ri + qtd;
+         if(newBlue > 255){
+           newBlue = 255;
+         }else if(newBlue < 0){
+           newBlue = 0;
+         }   
+         
+          aux.pixels[pos] = color(ri,gi, newBlue);  
+       }   
+    }
+  }
+  
+  return aux;
+}
+
+PImage realcarCor2(PImage aux,String hi, int qtd){
+    // Filtro de Média com Janela Deslizante
+  for (int y = 0; y < aux.height; y++) {
+    for (int x = 0; x < aux.width; x++) {
+      //int jan = 9;
+      
+      int pos = y*aux.width + x; /* acessa o ponto em forma de vetor */
+       
+      float ri = red(aux.pixels[pos]);
+      float gi = green(aux.pixels[pos]);
+      float bi = blue(aux.pixels[pos]);
+      
+      if(ri > gi){
+        if(ri > bi){
+          hi = "red";
+        }else{
+          hi = "blue";
+        }
+      }else if(gi > bi){
+        hi ="green";
+      }else{
+        hi = "all";
+      }
+      
+          if(hi == "red") {
+         float newRed = ri + qtd;
+         if(newRed > 255){
+           newRed = 255;
+         }else if(newRed < 0){
+           newRed = 0;
+         }         
+          aux.pixels[pos] = color(newRed,gi,bi );  
+          
+       }else if(hi == "green"){
+         float newGreen = ri + qtd;
+         if(newGreen > 255){
+           newGreen = 255;
+         }else if(newGreen < 0){
+           newGreen = 0;
+         }            
+          aux.pixels[pos] = color(ri,newGreen,bi );  
+          
+       }else if(hi == "blue"){
+         float newBlue = ri + qtd;
+         if(newBlue > 255){
+           newBlue = 255;
+         }else if(newBlue < 0){
+           newBlue = 0;
+         }            
+          aux.pixels[pos] = color(ri,gi, newBlue);  
+       } else if(hi == "all"){
+           float newRed = ri + qtd;         
+         float newGreen = ri + qtd;
+         float newBlue = ri + qtd;
+         
+         if(newRed > 255)newRed = 255;
+         else if(newRed < 0)newRed = 0; 
+         if(newGreen > 255)newGreen = 255;
+         else if(newGreen < 0)newGreen = 0;  
+         if(newBlue > 255)newBlue = 255;
+         else if(newBlue < 0)newBlue = 0;
+         
+          aux.pixels[pos] = color(newRed,newGreen, newBlue);  
+       }
+       
+      
+         
+    }
+  }
+  
+  return aux;
+}
+
+// verificar pixels
+void verificarPixel(PImage original,PImage novaImage){
+  int count = 0;
+  int falsoN = 0,falsoP = 0, verdadeiro = 0;
+  float percentFN = 0,percentFP = 0,percentV = 0;
+  
+  if(original.height == novaImage.height && original.width == novaImage.width){
+ println("IMAGENS DE DIMENSÕES IGUAIS");
+  int posO, posN;
+  int pAuxO, pAuxN;
+  
+  
+  for (int y = 0; y < original.height; y++) {
+    for (int x = 0; x < original.width; x++) {  
+      count++;
+      posO = (y)*original.width + (x);
+      posN = (y)*novaImage.width + (x);
+      pAuxO = parseInt(blue(original.pixels[posO]));
+      pAuxN = parseInt(blue(novaImage.pixels[posN]));
+      
+      if(pAuxO == 255 && pAuxN == 0){        
+      //falso negativo
+       falsoN ++;
+      
+      }else if(pAuxO == 0 && pAuxN == 255){
+      //falso positivo
+      falsoP ++;
+      
+      }else verdadeiro++;
+        
+    }
+  }
+  }else println("IMAGENS DE DIMENSÕES DIFERENTES");
+  
+  percentFN = falsoN * 100 / count;
+  percentFP = falsoP * 100 / count;
+  percentV = verdadeiro * 100 / count;
+  
+  println(count);
+  println(falsoN);
+  println(falsoP);
+  println(verdadeiro);
+  println(percentFN);
+  println(percentFP);
+  println(percentV);
+  
+  
+  
+ //for (int i = 0 ;i < m.length; i++){
+ //  for (int j = 0; j < m[i].length; j++){
+ //    print(m[i][j]); 
+ //    } 
+ //    println(""); // Aqui é o <enter> 
+ //}
+  
+}
+
+
+void linhasOrientacao() {
+  strokeWeight(1);
+  stroke(0);
+
+  //Linhas Horizontais
+  for (int i = 0; i <= 300; i+=30) {
+    line(0, i, 300, i);
+    textSize(10);
+    fill(255,0,0);
+    text(i, 380, i+10);
+  }
+
+  //Linhas Verticais
+  for (int i = 0; i <= 400; i+=30) {
+    line(i, 0, i, 400);
+    textSize(10);
+    fill(255,0,0);
+    text(i, i+5, 10);
+  }
+}
