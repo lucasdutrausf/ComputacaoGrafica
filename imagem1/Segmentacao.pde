@@ -1,37 +1,23 @@
 void setup() {
-  size(600, 640);
+  size(1200, 640);
   noLoop();
 }
 
 void draw() {
   PImage img = loadImage("img1.jpg");
   PImage imgMask = loadImage("img1 - mask.png");
-  PImage aux = createImage(img.width, img.height, RGB);
-  PImage aux2 = loadImage("img1.jpg");
-  //PImage imgCinza = createImage(img.width, img.height, RGB);
-  //PImage imgJanela = createImage(img.width, img.height, RGB);
- 
-   //blur
-   int jan = 3; 
- // range de cinza
-   int c1 = 160;
-   int c2 = 255;  
+  PImage aux =  loadImage("img1.jpg");
+  PImage aux2 = createImage(img.width, img.height, RGB);
    
- 
-  
-  //imgCinza = filtroEscalaCinza(aux, img);  // apagar dpois
-  //aux = filtroEscalaCinza(aux, img);
-
-//Filtro de Média com Janela Deslizante
-   //imgJanela = filtroMediaJanela(aux,imgJanela,img, jan);
-   //aux2      = filtroMediaJanela(aux,aux2,img, jan);
 
   // Filtro de limiarização
-   aux2 = limiarizarCinza(img,c1,c2);
-   verificarPixel(imgMask,aux2);
+   aux = limiarizarCinza(aux);
+   verificarPixel(imgMask,aux);
+   aux2 = addImageNoG(aux,aux2,img);
   
-
-  image(aux2,0,0);
+  image(img,0,0);
+  image(aux,aux.width+10,0);
+  image(aux2,aux2.width*2+20,0);
   image(imgMask,0,img.height + 10);
   //image(aux2,(img.width + 10),0);
   //image(imgG,(img.width + 10),img.height+ 10);
@@ -43,8 +29,7 @@ void draw() {
 //limiariraz
 // Verifica os tons de cinza e os tons entre a faixa cinza1 e cinza2 são pintados de preto
 
-PImage limiarizarCinza(PImage aux2, int cinza1,int cinza2){
-  
+PImage limiarizarCinza(PImage aux2){  
    for (int y = 0; y < aux2.height; y++) {
     for (int x = 0; x < aux2.width; x++) {
       int pos = (y)*aux2.width + (x);
@@ -74,6 +59,15 @@ PImage filtroEscalaCinza(PImage aux, PImage img){
   return aux;
 }
 
+PImage addImageNoG(PImage imgG, PImage imgGcomImagem, PImage imgOriginal){
+  for (int y = 0; y < imgG.height; y++) {
+    for (int x = 0; x < imgG.width; x++) {      
+      int pos = (y)*imgG.width + (x);
+      if(blue(imgG.pixels[pos]) > 0)imgGcomImagem.pixels[pos] = imgOriginal.pixels[pos];
+    }
+  }
+  return imgGcomImagem;
+}
 
 //Media de janela flutuante
 //borra a imagem conforme o tamanho da janela
