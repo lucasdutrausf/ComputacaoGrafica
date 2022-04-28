@@ -9,17 +9,12 @@ void draw() {
   PImage aux = loadImage("img4.jpg");
   PImage aux2 = createImage(img.width, img.height, RGB);
  
-   //blur
-   int jan = 0; 
    
-     //aux3 = filtroMediaColoridoJanela(aux3, jan);// Faz o filtro de Media, para desfocar a imagem e depois utiliza faz uma media de cada canal(RGB),para deixar mais facil de identificar o que é preto e o que nao é
-     //aux3 = realcarCor(aux3,255); //Faz a saturação de todos os pixels proximo ao 0, para deixar mais evidente e facilitar a identificação
-    //aux3 = filtroEscalaCinza(aux3, aux3);// Aplica o filtro de cinza, para facilitar na limiarização
-    
-   // aux = filtroMediaColoridoJanela(aux, jan);// Faz o filtro de Media, para desfocar a imagem e depois utiliza faz uma media de cada canal(RGB),para deixar mais facil de identificar o que é preto e o que nao é
+   
+     
     aux = realcarCor(aux,255); //Faz a saturação de todos os pixels proximo ao 0, para deixar mais evidente e facilitar a identificação
     aux = filtroEscalaCinza(aux, aux);// Aplica o filtro de cinza, para facilitar na limiarização
-   aux = limiarizar(aux);// Efetua a limiarização com base no tom preto dentro de uma janela centralizada no cachorro   
+    aux = limiarizar(aux);// Efetua a limiarização com base no tom preto dentro de uma janela centralizada no cachorro   
       
    verificarPixel(imgMask,aux);// Faz a contagem de do Falso Positivo, Falso Negativo, Positivo e %
    aux2 = addImageNoG(aux,aux2,img);// Substitui os pixels brancos pelos pixels da imagem original cachorro na imagem com o fundo preto
@@ -32,17 +27,18 @@ void draw() {
   //linhasOrientacao();
 }
 
-
 //limiariraz
 PImage limiarizar(PImage aux2){    
    int rx[] = {45,260};
-   int ry[] = {85,270};
+   int ry[] = {88,270};
    for (int y = 0; y < aux2.height; y++) {
     for (int x = 0; x < aux2.width; x++) {
       int pos = (y)*aux2.width + (x);
       if((blue(aux2.pixels[pos]) < 10) && (x>rx[0] && x < rx[1] && y > ry[0] && y < ry[1]))  
-          aux2.pixels[pos] = color(255);
-      else aux2.pixels[pos] = color(0);      
+          aux2.pixels[pos] = color(255); 
+      else aux2.pixels[pos] = color(0);
+      DDA(242,87,260,110,aux2,30);
+      DDA(230,87,190,130,aux2,30);
     }
   }
   return aux2;
@@ -184,6 +180,37 @@ void verificarPixel(PImage original,PImage novaImage){
   println("Verdadeiro \n Quantidade:"+verdadeiro+" \n Porcentagem:"+percentV+"\n("+verdadeiro+" x "+100 +")/"+count+ " = "+ percentV); 
 }
 
+void DDA(int x1,int y1,int x2,int y2, PImage img, int tam){
+  int len, i = 1;
+  float dx, dy, x, y;
+  
+  if(abs(x2-x1) >= abs(y2-y1)) {
+     len = abs(x2-x1);
+    } else {
+      len = abs(y2-y1);
+    }
+    
+    dx = (float) (x2-x1) / len;
+    dy = (float) (y2-y1) / len;
+    x = x1 + 0.5;
+    y = y1 + 0.5;
+    
+    while(i<=len) {
+      //println(int(x),int(y));
+      for(int cont = 0; cont <= tam; cont++){
+      PlotarPixelxy(int(x), int(y-cont), img);
+      }
+      x += dx;
+      y += dy;
+      i++;
+    }
+} 
+
+void PlotarPixelxy(int x, int y, PImage img){
+  int pos = y*img.width + x;
+  img.pixels[pos] = color(0);
+
+}
 
 void linhasOrientacao() {
   strokeWeight(1);
