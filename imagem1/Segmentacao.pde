@@ -10,7 +10,7 @@ void draw() {
   PImage aux2 = createImage(img.width, img.height, RGB);
    
 
-   aux = limiarizar(aux);// Efetua a limiarização com base no tom preto dentro de uma janela centralizada no cachorro   
+   aux = limiarizar(aux);// Efetua a limiarização com base nas cores escolhidas dentro de uma janela centralizada no cachorro   
    verificarPixel(imgMask,aux);// Faz a contagem de do Falso Positivo, Falso Negativo, Positivo e %
    aux2 = addImageNoG(aux,aux2,img);// Substitui os pixels brancos pelos pixels da imagem original cachorro na imagem com o fundo preto
    
