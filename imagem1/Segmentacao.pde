@@ -10,30 +10,23 @@ void draw() {
   PImage aux2 = createImage(img.width, img.height, RGB);
    
 
-  // Filtro de limiarização
-   aux = limiarizarCinza(aux);
-   verificarPixel(imgMask,aux);
-   aux2 = addImageNoG(aux,aux2,img);
+   aux = limiarizar(aux);// Efetua a limiarização com base no tom preto dentro de uma janela centralizada no cachorro   
+   verificarPixel(imgMask,aux);// Faz a contagem de do Falso Positivo, Falso Negativo, Positivo e %
+   aux2 = addImageNoG(aux,aux2,img);// Substitui os pixels brancos pelos pixels da imagem original cachorro na imagem com o fundo preto
+   
   
   image(img,0,0);
   image(aux,aux.width+10,0);
   image(aux2,aux2.width*2+20,0);
   image(imgMask,0,img.height + 10);
-  //image(aux2,(img.width + 10),0);
-  //image(imgG,(img.width + 10),img.height+ 10);
-  //image(imgJanela,((img.width*3) + 10),0);
-  //linhasOrientacao();
 }
 
 
 //limiariraz
-// Verifica os tons de cinza e os tons entre a faixa cinza1 e cinza2 são pintados de preto
-
-PImage limiarizarCinza(PImage aux2){  
+PImage limiarizar(PImage aux2){  
    for (int y = 0; y < aux2.height; y++) {
     for (int x = 0; x < aux2.width; x++) {
       int pos = (y)*aux2.width + (x);
-      //int media = int(red(aux2.pixels[pos]) + green(aux2.pixels[pos]) + blue(aux2.pixels[pos]))/3;
       if(blue(aux2.pixels[pos]) < 90 && y > 55 || x>40 && x < 90 && y > 90 && y < 150 || green(aux2.pixels[pos]) > 165 && x >150 && x < 250 && y < 235) aux2.pixels[pos] = color(255);
       else aux2.pixels[pos] = color(0);
       
@@ -51,13 +44,14 @@ PImage filtroEscalaCinza(PImage aux, PImage img){
     for (int x = 0; x < img.width; x++) {
 
       int pos = (y)*img.width + (x);
-      //int media = int((green(img.pixels[pos]) + red(img.pixels[pos]))/2);
       int media = int(green(img.pixels[pos]));
       aux.pixels[pos] = color(media);
     }
   }
   return aux;
 }
+
+
 
 PImage addImageNoG(PImage imgG, PImage imgGcomImagem, PImage imgOriginal){
   for (int y = 0; y < imgG.height; y++) {
@@ -69,41 +63,8 @@ PImage addImageNoG(PImage imgG, PImage imgGcomImagem, PImage imgOriginal){
   return imgGcomImagem;
 }
 
-//Media de janela flutuante
-//borra a imagem conforme o tamanho da janela
 
-PImage filtroMediaJanela(PImage aux,int jan){
-    // Filtro de Média com Janela Deslizante
-  for (int y = 0; y < aux.height; y++) {
-    for (int x = 0; x < aux.width; x++) {
-      //int jan = 9;
-      int pos = y*aux.width + x; /* acessa o ponto em forma de vetor */
 
-      float media = 0;
-      int qtde = 0;
-
-      for (int i = jan*(-1); i <= jan; i++) {
-        for (int j = jan*(-1); j <= jan; j++) {
-          int disy = y+i;
-          int disx = x+j;
-          if (disy >= 0 && disy < aux.height &&
-            disx >= 0 && disx < aux.width) {
-            int pos_aux = disy * aux.width + disx;
-            float r = blue(aux.pixels[pos_aux]);
-            media += r;
-            qtde++;
-          }
-        }
-      }
-      media = media / qtde;
-      aux.pixels[pos] = color(media);
-    }
-  }
-  
-  return aux;
-}
-
-// verificar pixels
 void verificarPixel(PImage original,PImage novaImage){
   int count = 0;
   int falsoN = 0,falsoP = 0, verdadeiro = 0;
@@ -136,31 +97,87 @@ void verificarPixel(PImage original,PImage novaImage){
     }
   }
   }else println("IMAGENS DE DIMENSÕES DIFERENTES");
-  
-  percentFN = falsoN * 100 / count;
-  percentFP = falsoP * 100 / count;
-  percentV = verdadeiro * 100 / count;
-  
-  println(count);
-  println(falsoN);
-  println(falsoP);
-  println(verdadeiro);
-  println(percentFN);
-  println(percentFP);
-  println(percentV);
+   
+  float falsoN1 = falsoN * 100;
+  percentFN = falsoN1/count;
+  println("Falso Negativo \n Quantidade:"+falsoN+" \n Porcentagem:"+percentFN+"\n("+falsoN+" x "+100 +")/"+count+ " = "+ percentFN);
   
   
+  println("");
+  float falsoP1 = falsoP * 100;  
+  percentFP = falsoP1 / count;
+  println("Falso Positivo \n Quantidade:"+falsoP+" \n Porcentagem:"+percentFP+"\n("+falsoP+" x "+100 +")/"+count+ " = "+ percentFP);
   
- //for (int i = 0 ;i < m.length; i++){
- //  for (int j = 0; j < m[i].length; j++){
- //    print(m[i][j]); 
- //    } 
- //    println(""); // Aqui é o <enter> 
- //}
-  
+  println("");
+  float percentV1 = verdadeiro * 100;  
+  percentV = percentV1 / count;
+  println("Verdadeiro \n Quantidade:"+verdadeiro+" \n Porcentagem:"+percentV+"\n("+verdadeiro+" x "+100 +")/"+count+ " = "+ percentV); 
 }
 
 
+PImage filtroMediaColoridoJanela(PImage aux,int jan){
+    // Filtro de Média com Janela Deslizante
+  for (int y = 0; y < aux.height; y++) {
+    for (int x = 0; x < aux.width; x++) {
+      //int jan = 9;
+      int pos = y*aux.width + x; /* acessa o ponto em forma de vetor */
+
+      float mediar = 0;
+      float mediag = 0;
+      float mediab = 0;
+      int qtde = 0;
+
+      for (int i = jan*(-1); i <= jan; i++) {
+        for (int j = jan*(-1); j <= jan; j++) {
+          int disy = y+i;
+          int disx = x+j;
+          if (disy >= 0 && disy < aux.height &&
+            disx >= 0 && disx < aux.width) {
+            int pos_aux = disy * aux.width + disx;
+            float r = blue(aux.pixels[pos_aux]);
+            float g = green(aux.pixels[pos_aux]);
+            float b = blue(aux.pixels[pos_aux]);
+            mediar += r;
+            mediag += g;
+            mediab += b;
+            qtde++;
+          }
+        }
+      }
+      mediar = mediar / qtde;
+      mediag = mediag / qtde;
+      mediab = mediab / qtde;
+      
+      aux.pixels[pos] = color(mediar,mediag,mediab);
+    }
+  }
+  
+  return aux;
+}
+
+PImage realcarCor(PImage aux, int qtd){
+    // Filtro de Média com Janela Deslizante
+  for (int y = 0; y < aux.height; y++) {
+    for (int x = 0; x < aux.width; x++) {
+      
+      int pos = y*aux.width + x; /* acessa o ponto em forma de vetor */       
+      float ri = red(aux.pixels[pos]);
+      float gi = green(aux.pixels[pos]);
+      float bi = blue(aux.pixels[pos]);
+      
+      if(gi < 101){
+        if(gi - qtd < 0)gi = 0;
+        if(ri - qtd < 0)ri = 0;
+        if(bi - qtd < 0)bi = 0;        
+        
+          aux.pixels[pos] = color(ri,gi, bi);  
+      }
+    }
+  }  
+  return aux;
+}
+
+//Aplica linhas de orientação 
 void linhasOrientacao() {
   strokeWeight(1);
   stroke(0);
